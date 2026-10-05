@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>OmniSuite - All-in-One Ultra-Responsive Productivity Engine</title>
+  
+  <!-- External Tailwind CSS & CDN Dependencies -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Tailwind Custom Config -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            },
+            accent: {
+              500: '#6366f1',
+              600: '#4f46e5',
+            }
+          },
+          screens: {
+            'xs': '475px',
+            '3xl': '1920px',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Modern Glassmorphism & UI Design Tokens */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(229, 231, 235, 0.5);
+    }
+    .dark .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.5);
+    }
+
+    /* Modern Fluid Typography Scaling */
+    html {
+      font-size: clamp(14px, 1.2vw, 16px);
+      touch-action: manipulation;
+    }
+
+    /* Custom Ultra-Smooth Scrollbars */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.4);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(107, 114, 128, 0.7);
+    }
+
+    /* Canvas Grid Pattern */
+    .canvas-bg {
+      background-image: radial-gradient(rgba(100, 116, 139, 0.2) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+
+    /* CSS Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Touch Canvas Action Guard */
+    canvas {
+      touch-action: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 h-full flex flex-col font-sans transition-colors duration-300 antialiased select-none md:select-auto">
+
+  <header class="h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 px-4 flex items-center justify-between z-30 flex-shrink-0 sticky top-0">
+    <div class="flex items-center space-x-3">
+      <!-- Drawer Toggle for Mobile / Collapsible Toggle for Desktop -->
+      <button id="sidebar-toggle" aria-label="Toggle Sidebar Navigation" class="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+        <i class="fas fa-bars text-lg"></i>
+      </button>
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center space-x-2.5 cursor-pointer">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-extrabold text-xl shadow-md shadow-indigo-500/20">
+          O
+        </div>
+        <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent hidden sm:inline-block">OmniSuite</span>
+      </div>
+    </div>
+
+    <!-- Active View Context Header Badge -->
+    <div id="module-header-title" class="font-bold text-sm sm:text-base text-slate-700 dark:text-slate-200 truncate max-w-[160px] sm:max-w-xs md:max-w-none px-3 py-1 bg-slate-100 dark:bg-slate-800/60 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
+      Dashboard Overview
+    </div>
+
+    <!-- Right Utility Buttons -->
+    <div class="flex items-center space-x-2 sm:space-x-3">
+      <div id="quick-clock" class="hidden xs:block text-xs font-mono font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
+        00:00:00 AM
+      </div>
+      <button id="theme-toggle-btn" title="Toggle Light/Dark Theme" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
+        <i class="fas fa-moon dark:hidden text-lg"></i>
+        <i class="fas fa-sun hidden dark:block text-amber-400 text-lg"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="flex flex-1 overflow-hidden relative">
+    
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-30 hidden transition-opacity lg:hidden"></div>
+
+    <!-- Collapsible Sidebar Navigation Drawer -->
+    <aside id="app-sidebar" class="fixed lg:static inset-y-0 left-0 w-64 bg-white/95 dark:bg-slate-900/95 lg:bg-white dark:lg:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between transition-transform duration-300 ease-in-out z-40 -translate-x-full lg:translate-x-0 flex-shrink-0">
+      
+      <!-- Nav Button List -->
+      <nav class="p-3 space-y-1 overflow-y-auto flex-1">
+        <button data-target="dashboard" class="nav-btn active w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 shadow-sm">
+          <i class="fas fa-chart-pie w-5 text-center text-base"></i>
+          <span>Dashboard</span>
+        </button>
+        <button data-target="tasks" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60">
+          <i class="fas fa-tasks w-5 text-center text-base"></i>
+          <span>Tasks & Gantt</span>
+        </button>
+        <button data-target="canvas" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60">
+          <i class="fas fa-paint-brush w-5 text-center text-base"></i>
+          <span>Drawing Canvas</span>
+        </button>
+        <button data-target="analytics" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60">
+          <i class="fas fa-chart-line w-5 text-center text-base"></i>
+          <span>Analytics Engine</span>
+        </button>
+        <button data-target="editor" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60">
+          <i class="fas fa-code w-5 text-center text-base"></i>
+          <span>Markdown Notepad</span>
+        </button>
+        <button data-target="games" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60">
+          <i class="fas fa-gamepad w-5 text-center text-base"></i>
+          <span>Arcade & Logic</span>
+        </button>
+        <button data-target="utilities" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60">
+          <i class="fas fa-tools w-5 text-center text-base"></i>
+          <span>Utility Suite</span>
+        </button>
+      </nav>
+
+      <!-- Sidebar Footer Live Metrics -->
+      <div class="p-3.5 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 space-y-1.5 bg-slate-50/50 dark:bg-slate-900/50">
+        <div class="flex justify-between items-center font-medium">
+          <span>Local Storage:</span>
+          <span id="storage-usage-text" class="font-mono text-slate-700 dark:text-slate-300">0 KB</span>
+        </div>
+        <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+          <div id="storage-bar" class="bg-indigo-600 h-full w-0 transition-all duration-500"></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto p-3 sm:p-5 md:p-6 bg-slate-100/60 dark:bg-slate-950/60 relative w-full">
+
+      <!-- MODULE 1: DASHBOARD OVERVIEW -->
+      <section id="module-dashboard" class="module-view space-y-6 animate-fade-in max-w-7xl mx-auto">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">System Operational Hub</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">Real-time stats and prioritized workflow monitors.</p>
+          </div>
+          <button id="dash-quick-task-btn" class="w-full sm:w-auto px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md shadow-indigo-500/20 text-sm transition active:scale-95 flex items-center justify-center space-x-2">
+            <i class="fas fa-plus"></i>
+            <span>Quick Add Task</span>
+          </button>
+        </div>
+
+        <!-- Adaptive Key Metrics Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div class="glass-panel p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg sm:text-xl flex-shrink-0">
+              <i class="fas fa-tasks"></i>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Tasks</p>
+              <h3 id="dash-stat-tasks" class="text-xl sm:text-2xl font-extrabold text-slate-800 dark:text-slate-100">0</h3>
+            </div>
+          </div>
+          <div class="glass-panel p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg sm:text-xl flex-shrink-0">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Completed</p>
+              <h3 id="dash-stat-completed" class="text-xl sm:text-2xl font-extrabold text-slate-800 dark:text-slate-100">0</h3>
+            </div>
+          </div>
+          <div class="glass-panel p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg sm:text-xl flex-shrink-0">
+              <i class="fas fa-file-alt"></i>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Doc Drafts</p>
+              <h3 id="dash-stat-docs" class="text-xl sm:text-2xl font-extrabold text-slate-800 dark:text-slate-100">1</h3>
+            </div>
+          </div>
+          <div class="glass-panel p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-lg sm:text-xl flex-shrink-0">
+              <i class="fas fa-trophy"></i>
+            </div>
+            <div>
+              <p class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">High Score</p>
+              <h3 id="dash-stat-score" class="text-xl sm:text-2xl font-extrabold text-slate-800 dark:text-slate-100">0</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Split Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Priority Task Stream -->
+          <div class="lg:col-span-2 glass-panel p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col">
+            <h2 class="text-base font-bold mb-3 flex items-center justify-between">
+              <span class="flex items-center space-x-2"><i class="fas fa-stream text-indigo-500"></i><span>Priority Task Stream</span></span>
+              <span class="text-xs text-slate-400 font-normal">Auto-sorted</span>
+            </h2>
+            <div id="dash-task-stream" class="space-y-2.5 flex-1 min-h-[180px]">
+              <!-- Dynamic items -->
+            </div>
+          </div>
+
+          <!-- Quick Scratchpad Note Widget -->
+          <div class="glass-panel p-4 sm:p-5 rounded-2xl shadow-sm flex flex-col">
+            <h2 class="text-base font-bold mb-3 flex items-center justify-between">
+              <span class="flex items-center space-x-2"><i class="fas fa-sticky-note text-amber-500"></i><span>Quick Scratchpad</span></span>
+              <span id="scratchpad-saved-badge" class="text-xs text-emerald-500 font-semibold opacity-0 transition-opacity">Saved</span>
+            </h2>
+            <textarea id="dash-scratchpad" class="w-full flex-1 min-h-[200px] p-3 rounded-xl bg-slate-50/70 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none font-mono" placeholder="Jot down quick ideas or thoughts..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODULE 2: TASKS & GANTT MANAGER -->
+      <section id="module-tasks" class="module-view hidden space-y-6 animate-fade-in max-w-7xl mx-auto">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Task & Gantt Studio</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">Manage tasks with fluid drag-and-drop Kanban or interactive Gantt timelines.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <!-- Switch Button -->
+            <div class="bg-slate-200/80 dark:bg-slate-800/80 p-1 rounded-xl flex text-xs font-bold border border-slate-300/40 dark:border-slate-700/40">
+              <button id="task-view-kanban-btn" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm transition">Kanban</button>
+              <button id="task-view-gantt-btn" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition">Gantt Chart</button>
+            </div>
+            <button id="add-task-modal-open-btn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md shadow-indigo-500/20 text-sm transition flex items-center space-x-2">
+              <i class="fas fa-plus"></i>
+              <span>Create Task</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="glass-panel p-3.5 rounded-2xl shadow-sm flex flex-col sm:flex-row gap-3 items-center">
+          <div class="w-full sm:flex-1">
+            <input type="text" id="task-search-input" placeholder="Search task titles..." class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div class="flex gap-2 w-full sm:w-auto">
+            <select id="task-filter-priority" class="flex-1 sm:w-auto px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold focus:outline-none">
+              <option value="all">All Priorities</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+            <select id="task-filter-tag" class="flex-1 sm:w-auto px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-semibold focus:outline-none">
+              <option value="all">All Tags</option>
+              <option value="Feature">Feature</option>
+              <option value="Bug">Bug</option>
+              <option value="Design">Design</option>
+              <option value="Research">Research</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Kanban Board Container -->
+        <div id="kanban-container" class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- TODO Column -->
+          <div class="glass-panel p-4 rounded-2xl shadow-sm flex flex-col">
+            <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-200 dark:border-slate-800">
+              <h3 class="font-bold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                <span>To Do</span>
+              </h3>
+              <span id="count-todo" class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-extrabold">0</span>
+            </div>
+            <div id="col-todo" class="kanban-col space-y-3 flex-1 min-h-[250px]" data-status="todo"></div>
+          </div>
+
+          <!-- IN PROGRESS Column -->
+          <div class="glass-panel p-4 rounded-2xl shadow-sm flex flex-col">
+            <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-200 dark:border-slate-800">
+              <h3 class="font-bold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                <span>In Progress</span>
+              </h3>
+              <span id="count-inprogress" class="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-extrabold">0</span>
+            </div>
+            <div id="col-inprogress" class="kanban-col space-y-3 flex-1 min-h-[250px]" data-status="inprogress"></div>
+          </div>
+
+          <!-- DONE Column -->
+          <div class="glass-panel p-4 rounded-2xl shadow-sm flex flex-col">
+            <div class="flex items-center justify-between mb-3.5 pb-2 border-b border-slate-200 dark:border-slate-800">
+              <h3 class="font-bold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span>Completed</span>
+              </h3>
+              <span id="count-done" class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-extrabold">0</span>
+            </div>
+            <div id="col-done" class="kanban-col space-y-3 flex-1 min-h-[250px]" data-status="done"></div>
+          </div>
+        </div>
+
+        <!-- Gantt View (Hidden by Default) -->
+        <div id="gantt-container" class="hidden glass-panel p-5 rounded-2xl shadow-sm overflow-x-auto">
+          <div class="min-w-[650px] space-y-4">
+            <h3 class="font-extrabold text-sm flex items-center space-x-2"><i class="fas fa-chart-gantt text-indigo-500"></i><span>Project Timeline View</span></h3>
+            <div id="gantt-chart-wrapper" class="space-y-3">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODULE 3: DRAWING CANVAS STUDIO -->
+      <section id="module-canvas" class="module-view hidden space-y-4 animate-fade-in max-w-7xl mx-auto">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Responsive Drawing Canvas</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">Touch-enabled artwork studio with real-time vector shape support.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button id="canvas-clear-btn" class="px-3.5 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 rounded-xl text-xs font-bold transition">Clear Canvas</button>
+            <button id="canvas-export-btn" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-indigo-500/20">Export Image</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+          <!-- Canvas Toolbar Controls -->
+          <div class="glass-panel p-4 rounded-2xl shadow-sm space-y-4">
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Tools</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button data-tool="brush" class="tool-btn active p-2.5 rounded-xl border border-indigo-500/50 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-center transition">
+                  <i class="fas fa-paint-brush block mb-1 text-sm"></i>
+                  <span class="text-[10px] font-bold">Brush</span>
+                </button>
+                <button data-tool="line" class="tool-btn p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                  <i class="fas fa-slash block mb-1 text-sm"></i>
+                  <span class="text-[10px] font-bold">Line</span>
+                </button>
+                <button data-tool="rectangle" class="tool-btn p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                  <i class="far fa-square block mb-1 text-sm"></i>
+                  <span class="text-[10px] font-bold">Rect</span>
+                </button>
+                <button data-tool="circle" class="tool-btn p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                  <i class="far fa-circle block mb-1 text-sm"></i>
+                  <span class="text-[10px] font-bold">Circle</span>
+                </button>
+                <button data-tool="eraser" class="tool-btn p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-center hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                  <i class="fas fa-eraser block mb-1 text-sm"></i>
+                  <span class="text-[10px] font-bold">Eraser</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-800">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">Color</label>
+                <input type="color" id="canvas-color-picker" value="#4f46e5" class="w-full h-10 p-0 rounded-xl border-0 cursor-pointer bg-transparent">
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Stroke Size (<span id="stroke-val-lbl">4</span>px)</label>
+                <input type="range" id="canvas-stroke-width" min="1" max="40" value="4" class="w-full accent-indigo-600">
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Interactive Touch Canvas Wrapper -->
+          <div id="canvas-wrapper" class="lg:col-span-3 glass-panel p-2 rounded-2xl shadow-sm flex flex-col items-center justify-center relative overflow-hidden min-h-[420px] sm:min-h-[500px]">
+            <canvas id="main-drawing-canvas" class="canvas-bg rounded-xl cursor-crosshair w-full h-[420px] sm:h-[500px] border border-slate-200/80 dark:border-slate-800"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODULE 4: DATA ANALYTICS & VISUALIZATION -->
+      <section id="module-analytics" class="module-view hidden space-y-6 animate-fade-in max-w-7xl mx-auto">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Data Analytics Engine</h1>
+          <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">Dynamic dataset processing with reactive Chart.js visualizer.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Input Form Panel -->
+          <div class="glass-panel p-5 rounded-2xl shadow-sm space-y-4">
+            <h3 class="font-extrabold text-sm uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Chart Configuration</h3>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Chart Type</label>
+              <select id="analytics-chart-type" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm font-semibold">
+                <option value="bar">Bar Chart</option>
+                <option value="line">Line Graph</option>
+                <option value="pie">Pie Chart</option>
+                <option value="doughnut">Doughnut Chart</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Labels (Comma Separated)</label>
+              <input type="text" id="analytics-labels-input" value="Jan, Feb, Mar, Apr, May, Jun" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Values (Comma Separated Numbers)</label>
+              <input type="text" id="analytics-values-input" value="65, 59, 80, 81, 56, 95" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-sm">
+            </div>
+            <button id="analytics-update-btn" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md shadow-indigo-500/20 text-sm transition">Render Analytics</button>
+
+            <!-- Computed Statistical Output -->
+            <div class="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-2 text-xs">
+              <h4 class="font-extrabold text-slate-700 dark:text-slate-300">Statistical Analysis Summary:</h4>
+              <div class="flex justify-between"><span class="text-slate-500">Sum Total:</span><span id="stat-sum" class="font-mono font-bold">0</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">Mean Average:</span><span id="stat-mean" class="font-mono font-bold">0</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">Min Value:</span><span id="stat-min" class="font-mono font-bold">0</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">Max Value:</span><span id="stat-max" class="font-mono font-bold">0</span></div>
+            </div>
+          </div>
+
+          <!-- Dynamic Render Canvas Box -->
+          <div class="lg:col-span-2 glass-panel p-5 rounded-2xl shadow-sm flex flex-col justify-center items-center min-h-[350px]">
+            <canvas id="analytics-chart-canvas" class="max-h-[380px] w-full"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODULE 5: MARKDOWN NOTEPAD & EDITOR -->
+      <section id="module-editor" class="module-view hidden space-y-4 animate-fade-in max-w-7xl mx-auto h-full flex flex-col">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-shrink-0">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Markdown Notepad Studio</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">Write markdown or code with dynamic side-by-side preview rendering.</p>
+          </div>
+          <button id="editor-download-btn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs transition shadow-md shadow-indigo-500/20 flex items-center justify-center space-x-1.5 w-full sm:w-auto">
+            <i class="fas fa-download"></i>
+            <span>Export Document (.md)</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 min-h-[450px]">
+          <!-- Input Area -->
+          <div class="flex flex-col glass-panel rounded-2xl shadow-sm overflow-hidden">
+            <div class="bg-slate-200/50 dark:bg-slate-800/50 px-4 py-2 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Markdown Source Code
+            </div>
+            <textarea id="markdown-input-area" class="w-full flex-1 p-4 bg-transparent font-mono text-xs sm:text-sm focus:outline-none resize-none" placeholder="# Draft markdown text here..."></textarea>
+          </div>
+
+          <!-- Live Formatted Preview -->
+          <div class="flex flex-col glass-panel rounded-2xl shadow-sm overflow-hidden">
+            <div class="bg-slate-200/50 dark:bg-slate-800/50 px-4 py-2 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Live Rendered Output
+            </div>
+            <div id="markdown-preview-area" class="w-full flex-1 p-4 overflow-y-auto prose dark:prose-invert max-w-none text-xs sm:text-sm"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODULE 6: ARCADE & LOGIC GAMES -->
+      <section id="module-games" class="module-view hidden space-y-6 animate-fade-in max-w-7xl mx-auto">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Arcade & Mental Logic Minigames</h1>
+          <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">Enhance cognitive speed with Minimax AI Tic-Tac-Toe, Snake, and Math Speed challenge.</p>
+        </div>
+
+        <!-- Game Navigation Tabs -->
+        <div class="flex border-b border-slate-200 dark:border-slate-800 space-x-6 text-xs sm:text-sm font-bold">
+          <button data-game="tic-tac-toe" class="game-tab-btn border-b-2 border-indigo-600 pb-2 text-indigo-600 dark:text-indigo-400">Tic-Tac-Toe AI</button>
+          <button data-game="snake" class="game-tab-btn border-b-2 border-transparent pb-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-200">Snake Game</button>
+          <button data-game="math" class="game-tab-btn border-b-2 border-transparent pb-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-200">Speed Math</button>
+        </div>
+
+        <!-- GAME 1: TIC TAC TOE AI -->
+        <div id="game-view-tic-tac-toe" class="game-subview space-y-4">
+          <div class="max-w-xs mx-auto text-center space-y-4 glass-panel p-6 rounded-2xl shadow-sm">
+            <h3 class="font-extrabold text-base">Unbeatable Tic-Tac-Toe</h3>
+            <p id="ttt-status" class="text-xs font-bold text-indigo-600 dark:text-indigo-400">Your Turn (X)</p>
+            
+            <div id="ttt-grid" class="grid grid-cols-3 gap-2.5 w-60 h-60 mx-auto">
+              <!-- Grid cells -->
+            </div>
+
+            <button id="ttt-reset-btn" class="w-full py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-xs font-bold rounded-xl transition">Reset Board</button>
+          </div>
+        </div>
+
+        <!-- GAME 2: SNAKE GAME -->
+        <div id="game-view-snake" class="game-subview hidden space-y-4">
+          <div class="max-w-md mx-auto text-center space-y-4 glass-panel p-6 rounded-2xl shadow-sm">
+            <div class="flex justify-between items-center text-xs font-extrabold">
+              <span>Score: <span id="snake-score" class="text-indigo-600 dark:text-indigo-400">0</span></span>
+              <span>High Score: <span id="snake-highscore" class="text-emerald-500">0</span></span>
+            </div>
+            
+            <canvas id="snake-canvas" width="300" height="300" class="bg-slate-900 rounded-xl mx-auto border border-slate-800 shadow-inner"></canvas>
+            
+            <!-- Mobile Direction Pad Touch Controls -->
+            <div class="grid grid-cols-3 gap-1.5 w-36 mx-auto sm:hidden">
+              <div></div>
+              <button id="s-up" class="p-3 bg-slate-200 dark:bg-slate-800 rounded-lg text-xs font-bold"><i class="fas fa-chevron-up"></i></button>
+              <div></div>
+              <button id="s-left" class="p-3 bg-slate-200 dark:bg-slate-800 rounded-lg text-xs font-bold"><i class="fas fa-chevron-left"></i></button>
+              <button id="s-down" class="p-3 bg-slate-200 dark:bg-slate-800 rounded-lg text-xs font-bold"><i class="fas fa-chevron-down"></i></button>
+              <button id="s-right" class="p-3 bg-slate-200 dark:bg-slate-800 rounded-lg text-xs font-bold"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <div class="flex justify-center space-x-3">
+              <button id="snake-start-btn" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/20">Start Snake Game</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- GAME 3: SPEED MATH -->
+        <div id="game-view-math" class="game-subview hidden space-y-4">
+          <div class="max-w-sm mx-auto text-center space-y-4 glass-panel p-6 rounded-2xl shadow-sm">
+            <h3 class="font-extrabold text-base">Speed Math Challenge</h3>
+            <div id="math-arena" class="space-y-4">
+              <div class="text-3xl font-mono font-extrabold tracking-wider text-indigo-600 dark:text-indigo-400" id="math-problem">Click Start</div>
+              <input type="number" id="math-answer-input" placeholder="Enter answer..." disabled class="w-full text-center py-2 px-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-lg font-mono focus:outline-none">
+              <div class="flex justify-between text-xs font-bold text-slate-500">
+                <span>Time: <span id="math-time">60</span>s</span>
+                <span>Score: <span id="math-score">0</span></span>
+              </div>
+              <button id="math-start-btn" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs shadow-md shadow-indigo-500/20">Start Challenge</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MODULE 7: UTILITY TOOLS SUITE -->
+      <section id="module-utilities" class="module-view hidden space-y-6 animate-fade-in max-w-7xl mx-auto">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Utility Tools Suite</h1>
+          <p class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm">Handy online productivity generators and timers.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Password Generator -->
+          <div class="glass-panel p-5 rounded-2xl shadow-sm space-y-4">
+            <h3 class="font-extrabold text-sm flex items-center space-x-2">
+              <i class="fas fa-key text-indigo-500"></i>
+              <span>Password Generator</span>
+            </h3>
+            <div class="relative">
+              <input type="text" id="pass-output" readonly class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl font-mono text-xs pr-10">
+              <button id="pass-copy-btn" class="absolute right-2 top-2 text-slate-400 hover:text-indigo-600 p-1 transition">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between items-center font-semibold">
+                <span>Length (<span id="pass-len-val">16</span>)</span>
+                <input type="range" id="pass-length" min="8" max="32" value="16" class="accent-indigo-600">
+              </div>
+              <label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" id="pass-inc-sym" checked class="rounded accent-indigo-600"><span>Include Symbols</span></label>
+              <label class="flex items-center space-x-2 cursor-pointer"><input type="checkbox" id="pass-inc-num" checked class="rounded accent-indigo-600"><span>Include Numbers</span></label>
+            </div>
+            <button id="pass-generate-btn" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-500/20">Generate</button>
+          </div>
+
+          <!-- Color Palette Generator -->
+          <div class="glass-panel p-5 rounded-2xl shadow-sm space-y-4">
+            <h3 class="font-extrabold text-sm flex items-center space-x-2">
+              <i class="fas fa-palette text-indigo-500"></i>
+              <span>Palette Generator</span>
+            </h3>
+            <div id="palette-display" class="grid grid-cols-5 h-20 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-inner">
+              <!-- Color swatches -->
+            </div>
+            <button id="palette-generate-btn" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-indigo-500/20">Generate Palette</button>
+          </div>
+
+          <!-- Precision Stopwatch Timer -->
+          <div class="glass-panel p-5 rounded-2xl shadow-sm space-y-4">
+            <h3 class="font-extrabold text-sm flex items-center space-x-2">
+              <i class="fas fa-stopwatch text-indigo-500"></i>
+              <span>Precision Timer</span>
+            </h3>
+            <div id="timer-display" class="text-3xl font-mono font-extrabold text-center py-2 text-slate-800 dark:text-slate-100">
+              00:00.00
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <button id="timer-start-btn" class="py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold">Start</button>
+              <button id="timer-pause-btn" class="py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold">Pause</button>
+              <button id="timer-reset-btn" class="py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold">Reset</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- TASK CREATION MODAL -->
+  <div id="task-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity">
+    <div class="glass-panel rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-fade-in">
+      <div class="flex justify-between items-center">
+        <h3 class="font-extrabold text-base">Create New Task</h3>
+        <button id="task-modal-close-btn" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="fas fa-times text-base"></i></button>
+      </div>
+      <form id="task-form" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold mb-1">Task Title</label>
+          <input type="text" id="task-title-input" required class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold mb-1">Priority</label>
+            <select id="task-priority-input" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none">
+              <option value="Low">Low</option>
+              <option value="Medium" selected>Medium</option>
+              <option value="High">High</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1">Tag Category</label>
+            <select id="task-tag-input" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold focus:outline-none">
+              <option value="Feature">Feature</option>
+              <option value="Bug">Bug</option>
+              <option value="Design">Design</option>
+              <option value="Research">Research</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-bold mb-1">Due Date</label>
+          <input type="date" id="task-date-input" required class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs shadow-md shadow-indigo-500/20 transition">Save Task</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // --- STATE MANAGEMENT ---
+    const AppState = {
+      theme: localStorage.getItem('omni_theme') || 'light',
+      tasks: JSON.parse(localStorage.getItem('omni_tasks')) || [
+        { id: '1', title: 'Design Mobile Drawer Navigation', priority: 'High', tag: 'Design', status: 'done', dueDate: '2026-10-01' },
+        { id: '2', title: 'Implement Responsive Touch Canvas', priority: 'High', tag: 'Feature', status: 'inprogress', dueDate: '2026-10-05' },
+        { id: '3', title: 'Optimize Chart Engine Viewports', priority: 'Medium', tag: 'Bug', status: 'todo', dueDate: '2026-10-10' }
+      ],
+      scratchpad: localStorage.getItem('omni_scratchpad') || '',
+      markdown: localStorage.getItem('omni_markdown') || '# OmniSuite Markdown Studio\n\n- Write **bold**, *italics*, or `code blocks`\n- Ultra-responsive side-by-side live preview\n\n```javascript\nconsole.log("OmniSuite Responsive Engine Active!");\n```',
+      snakeHighScore: parseInt(localStorage.getItem('omni_snake_hs')) || 0,
+      
+      saveTasks() {
+        localStorage.setItem('omni_tasks', JSON.stringify(this.tasks));
+        UI.updateStorageMetric();
+      },
+      saveScratchpad() {
+        localStorage.setItem('omni_scratchpad', this.scratchpad);
+        UI.updateStorageMetric();
+      },
+      saveMarkdown() {
+        localStorage.setItem('omni_markdown', this.markdown);
+        UI.updateStorageMetric();
+      }
+    };
+
+    // --- GENERAL UI & RESPONSIVE CONTROLLER ---
+    const UI = {
+      init() {
+        this.setupTheme();
+        this.setupNavigation();
+        this.setupClock();
+        this.updateStorageMetric();
+        this.setupScratchpad();
+        this.setupResizeListeners();
+      },
+
+      setupTheme() {
+        if (AppState.theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+        document.getElementById('theme-toggle-btn').addEventListener('click', () => {
+          document.documentElement.classList.toggle('dark');
+          AppState.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+          localStorage.setItem('omni_theme', AppState.theme);
+        });
+      },
+
+      setupNavigation() {
+        const sidebar = document.getElementById('app-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const toggleBtn = document.getElementById('sidebar-toggle');
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const modules = document.querySelectorAll('.module-view');
+        const titleLbl = document.getElementById('module-header-title');
+
+        const toggleDrawer = () => {
+          const isHidden = sidebar.classList.contains('-translate-x-full');
+          if (isHidden) {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden');
+          } else {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+          }
+        };
+
+        toggleBtn.addEventListener('click', toggleDrawer);
+        overlay.addEventListener('click', toggleDrawer);
+
+        navBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-target');
+            
+            navBtns.forEach(b => {
+              b.classList.remove('bg-indigo-50', 'dark:bg-indigo-950/60', 'text-indigo-600', 'dark:text-indigo-400', 'shadow-sm');
+              b.classList.add('text-slate-600', 'dark:text-slate-300');
+            });
+            btn.classList.add('bg-indigo-50', 'dark:bg-indigo-950/60', 'text-indigo-600', 'dark:text-indigo-400', 'shadow-sm');
+
+            modules.forEach(m => m.classList.add('hidden'));
+            const targetModule = document.getElementById(`module-${target}`);
+            if (targetModule) {
+              targetModule.classList.remove('hidden');
+            }
+
+            titleLbl.textContent = btn.querySelector('span').textContent + ' Module';
+            
+            // Auto close mobile drawer on navigation click
+            if (window.innerWidth < 1024) {
+              sidebar.classList.add('-translate-x-full');
+              overlay.classList.add('hidden');
+            }
+
+            // Canvas & Analytics recalculations
+            if (target === 'canvas') CanvasModule.resize();
+            if (target === 'analytics') AnalyticsModule.renderChart();
+          });
+        });
+      },
+
+      setupClock() {
+        const clockEl = document.getElementById('quick-clock');
+        const update = () => {
+          const now = new Date();
+          clockEl.textContent = now.toLocaleTimeString();
+        };
+        setInterval(update, 1000);
+        update();
+      },
+
+      updateStorageMetric() {
+        const totalBytes = new Blob([JSON.stringify(localStorage)]).size;
+        const kb = (totalBytes / 1024).toFixed(1);
+        document.getElementById('storage-usage-text').textContent = `${kb} KB`;
+        const percentage = Math.min((totalBytes / (5 * 1024 * 1024)) * 100, 100);
+        document.getElementById('storage-bar').style.width = `${percentage}%`;
+      },
+
+      setupScratchpad() {
+        const pad = document.getElementById('dash-scratchpad');
+        const badge = document.getElementById('scratchpad-saved-badge');
+        pad.value = AppState.scratchpad;
+
+        let timeout = null;
+        pad.addEventListener('input', (e) => {
+          AppState.scratchpad = e.target.value;
+          clearTimeout(timeout);
+          badge.classList.remove('opacity-0');
+          timeout = setTimeout(() => {
+            AppState.saveScratchpad();
+            badge.classList.add('opacity-0');
+          }, 800);
+        });
+      },
+
+      setupResizeListeners() {
+        window.addEventListener('resize', () => {
+          CanvasModule.resize();
+        });
+      }
+    };
+
+    // --- TASK & GANTT MODULE ---
+    const TaskModule = {
+      init() {
+        this.render();
+        this.setupEventListeners();
+      },
+
+      setupEventListeners() {
+        const modal = document.getElementById('task-modal');
+        document.getElementById('add-task-modal-open-btn').addEventListener('click', () => modal.classList.remove('hidden', 'opacity-0'));
+        document.getElementById('dash-quick-task-btn').addEventListener('click', () => modal.classList.remove('hidden', 'opacity-0'));
+        document.getElementById('task-modal-close-btn').addEventListener('click', () => modal.classList.add('hidden', 'opacity-0'));
+
+        document.getElementById('task-form').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const newTask = {
+            id: Date.now().toString(),
+            title: document.getElementById('task-title-input').value,
+            priority: document.getElementById('task-priority-input').value,
+            tag: document.getElementById('task-tag-input').value,
+            status: 'todo',
+            dueDate: document.getElementById('task-date-input').value
+          };
+          AppState.tasks.push(newTask);
+          AppState.saveTasks();
+          this.render();
+          modal.classList.add('hidden', 'opacity-0');
+          e.target.reset();
+        });
+
+        document.getElementById('task-search-input').addEventListener('input', () => this.render());
+        document.getElementById('task-filter-priority').addEventListener('change', () => this.render());
+        document.getElementById('task-filter-tag').addEventListener('change', () => this.render());
+
+        document.getElementById('task-view-kanban-btn').addEventListener('click', () => {
+          document.getElementById('kanban-container').classList.remove('hidden');
+          document.getElementById('gantt-container').classList.add('hidden');
+        });
+        document.getElementById('task-view-gantt-btn').addEventListener('click', () => {
+          document.getElementById('kanban-container').classList.add('hidden');
+          document.getElementById('gantt-container').classList.remove('hidden');
+          this.renderGantt();
+        });
+      },
+
+      render() {
+        const query = document.getElementById('task-search-input').value.toLowerCase();
+        const prioFilter = document.getElementById('task-filter-priority').value;
+        const tagFilter = document.getElementById('task-filter-tag').value;
+
+        const filtered = AppState.tasks.filter(t => {
+          const matchQuery = t.title.toLowerCase().includes(query);
+          const matchPrio = prioFilter === 'all' || t.priority === prioFilter;
+          const matchTag = tagFilter === 'all' || t.tag === tagFilter;
+          return matchQuery && matchPrio && matchTag;
+        });
+
+        ['todo', 'inprogress', 'done'].forEach(status => {
+          const col = document.getElementById(`col-${status}`);
+          col.innerHTML = '';
+          const count = filtered.filter(t => t.status === status).length;
+          document.getElementById(`count-${status}`).textContent = count;
+        });
+
+        filtered.forEach(task => {
+          const card = document.createElement('div');
+          card.className = 'p-3 bg-white/90 dark:bg-slate-900/90 rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2 cursor-pointer hover:shadow-md transition';
+          card.innerHTML = `
+            <div class="flex justify-between items-start">
+              <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md ${this.getPriorityBadge(task.priority)}">${task.priority}</span>
+              <button onclick="TaskModule.deleteTask('${task.id}')" class="text-slate-400 hover:text-rose-500 text-xs p-1"><i class="fas fa-trash"></i></button>
+            </div>
+            <p class="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200">${task.title}</p>
+            <div class="flex justify-between items-center text-[11px] text-slate-400">
+              <span class="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md font-semibold text-slate-600 dark:text-slate-300">${task.tag}</span>
+              <span><i class="far fa-calendar-alt mr-1"></i>${task.dueDate}</span>
+            </div>
+            <div class="pt-2 flex justify-end space-x-1 border-t border-slate-100 dark:border-slate-800/80">
+              ${task.status !== 'todo' ? `<button onclick="TaskModule.moveTask('${task.id}', 'todo')" class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[10px] font-bold rounded-lg">To Do</button>` : ''}
+              ${task.status !== 'inprogress' ? `<button onclick="TaskModule.moveTask('${task.id}', 'inprogress')" class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-[10px] font-bold rounded-lg">Progress</button>` : ''}
+              ${task.status !== 'done' ? `<button onclick="TaskModule.moveTask('${task.id}', 'done')" class="px-2 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold rounded-lg">Done</button>` : ''}
+            </div>
+          `;
+          document.getElementById(`col-${task.status}`).appendChild(card);
+        });
+
+        document.getElementById('dash-stat-tasks').textContent = AppState.tasks.length;
+        document.getElementById('dash-stat-completed').textContent = AppState.tasks.filter(t => t.status === 'done').length;
+
+        const stream = document.getElementById('dash-task-stream');
+        stream.innerHTML = '';
+        AppState.tasks.slice(0, 4).forEach(t => {
+          const item = document.createElement('div');
+          item.className = 'flex justify-between items-center p-3 rounded-xl bg-white/50 dark:bg-slate-900/50 border border-slate-200/60 dark:border-slate-800 text-xs font-medium';
+          item.innerHTML = `
+            <div class="flex items-center space-x-2.5 truncate mr-2">
+              <span class="w-2 h-2 rounded-full flex-shrink-0 ${t.status === 'done' ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
+              <span class="truncate">${t.title}</span>
+            </div>
+            <span class="text-slate-400 text-[11px] font-mono">${t.dueDate}</span>
+          `;
+          stream.appendChild(item);
+        });
+      },
+
+      getPriorityBadge(prio) {
+        if (prio === 'High') return 'bg-rose-500/10 text-rose-600 dark:text-rose-400';
+        if (prio === 'Medium') return 'bg-amber-500/10 text-amber-600 dark:text-amber-400';
+        return 'bg-slate-500/10 text-slate-600 dark:text-slate-400';
+      },
+
+      moveTask(id, newStatus) {
+        const t = AppState.tasks.find(x => x.id === id);
+        if (t) {
+          t.status = newStatus;
+          AppState.saveTasks();
+          this.render();
+        }
+      },
+
+      deleteTask(id) {
+        AppState.tasks = AppState.tasks.filter(x => x.id !== id);
+        AppState.saveTasks();
+        this.render();
+      },
+
+      renderGantt() {
+        const container = document.getElementById('gantt-chart-wrapper');
+        container.innerHTML = '';
+        AppState.tasks.forEach(t => {
+          const row = document.createElement('div');
+          row.className = 'flex items-center space-x-4 text-xs';
+          row.innerHTML = `
+            <div class="w-1/3 font-semibold truncate">${t.title}</div>
+            <div class="flex-1 bg-slate-200 dark:bg-slate-800 h-5 rounded-full overflow-hidden relative">
+              <div class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: ${t.status === 'done' ? '100%' : t.status === 'inprogress' ? '55%' : '20%'}"></div>
+            </div>
+          `;
+          container.appendChild(row);
+        });
+      }
+    };
+
+    // --- DRAWING CANVAS MODULE WITH TOUCH CONTROLS ---
+    const CanvasModule = {
+      canvas: null,
+      ctx: null,
+      isDrawing: false,
+      currentTool: 'brush',
+
+      init() {
+        this.canvas = document.getElementById('main-drawing-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.resize();
+        this.setupEvents();
+      },
+
+      resize() {
+        if (!this.canvas) return;
+        const wrapper = document.getElementById('canvas-wrapper');
+        if (wrapper) {
+          this.canvas.width = wrapper.clientWidth - 20;
+          this.canvas.height = Math.max(wrapper.clientHeight - 20, 420);
+        }
+      },
+
+      setupEvents() {
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.tool-btn').forEach(b => {
+              b.classList.remove('active', 'border-indigo-500/50', 'bg-indigo-50', 'dark:bg-indigo-950/60', 'text-indigo-600', 'dark:text-indigo-400');
+              b.classList.add('border-slate-200', 'dark:border-slate-800');
+            });
+            btn.classList.add('active', 'border-indigo-500/50', 'bg-indigo-50', 'dark:bg-indigo-950/60', 'text-indigo-600', 'dark:text-indigo-400');
+            this.currentTool = btn.getAttribute('data-tool');
+          });
+        });
+
+        document.getElementById('canvas-stroke-width').addEventListener('input', (e) => {
+          document.getElementById('stroke-val-lbl').textContent = e.target.value;
+        });
+
+        // Mouse Listeners
+        this.canvas.addEventListener('mousedown', (e) => this.startDraw(e));
+        this.canvas.addEventListener('mousemove', (e) => this.draw(e));
+        this.canvas.addEventListener('mouseup', () => this.stopDraw());
+
+        // Mobile Touch Listeners
+        this.canvas.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          const touch = e.touches[0];
+          this.startDraw(touch);
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchmove', (e) => {
+          e.preventDefault();
+          const touch = e.touches[0];
+          this.draw(touch);
+        }, { passive: false });
+
+        this.canvas.addEventListener('touchend', () => this.stopDraw());
+
+        document.getElementById('canvas-clear-btn').addEventListener('click', () => {
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        });
+
+        document.getElementById('canvas-export-btn').addEventListener('click', () => {
+          const data = this.canvas.toDataURL('image/png');
+          const a = document.createElement('a');
+          a.href = data;
+          a.download = 'omnisuite-artwork.png';
+          a.click();
+        });
+      },
+
+      getPos(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      },
+
+      startDraw(e) {
+        this.isDrawing = true;
+        const pos = this.getPos(e);
+        this.ctx.beginPath();
+        this.ctx.moveTo(pos.x, pos.y);
+      },
+
+      draw(e) {
+        if (!this.isDrawing) return;
+        const pos = this.getPos(e);
+        const color = document.getElementById('canvas-color-picker').value;
+        const width = document.getElementById('canvas-stroke-width').value;
+
+        this.ctx.lineWidth = width;
+        this.ctx.lineCap = 'round';
+
+        if (this.currentTool === 'eraser') {
+          this.ctx.strokeStyle = '#ffffff';
+          this.ctx.lineTo(pos.x, pos.y);
+          this.ctx.stroke();
+        } else if (this.currentTool === 'brush') {
+          this.ctx.strokeStyle = color;
+          this.ctx.lineTo(pos.x, pos.y);
+          this.ctx.stroke();
+        }
+      },
+
+      stopDraw() {
+        this.isDrawing = false;
+      }
+    };
+
+    // --- DATA ANALYTICS MODULE ---
+    const AnalyticsModule = {
+      chart: null,
+
+      init() {
+        document.getElementById('analytics-update-btn').addEventListener('click', () => this.renderChart());
+        this.renderChart();
+      },
+
+      renderChart() {
+        const type = document.getElementById('analytics-chart-type').value;
+        const labels = document.getElementById('analytics-labels-input').value.split(',').map(s => s.trim());
+        const values = document.getElementById('analytics-values-input').value.split(',').map(s => parseFloat(s.trim()) || 0);
+
+        const sum = values.reduce((a, b) => a + b, 0);
+        const mean = (sum / (values.length || 1)).toFixed(2);
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+
+        document.getElementById('stat-sum').textContent = sum;
+        document.getElementById('stat-mean').textContent = mean;
+        document.getElementById('stat-min').textContent = min;
+        document.getElementById('stat-max').textContent = max;
+
+        const ctx = document.getElementById('analytics-chart-canvas').getContext('2d');
+        if (this.chart) this.chart.destroy();
+
+        this.chart = new Chart(ctx, {
+          type: type,
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Dataset Visualizer',
+              data: values,
+              backgroundColor: ['#6366f1', '#a855f7', '#ec4899', '#3b82f6', '#10b981', '#f59e0b'],
+              borderColor: '#4f46e5',
+              borderWidth: 1.5
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+      }
+    };
+
+    // --- MARKDOWN NOTEPAD MODULE ---
+    const EditorModule = {
+      init() {
+        const area = document.getElementById('markdown-input-area');
+        const preview = document.getElementById('markdown-preview-area');
+        
+        area.value = AppState.markdown;
+        const update = () => {
+          AppState.markdown = area.value;
+          preview.innerHTML = marked.parse(area.value);
+          AppState.saveMarkdown();
+        };
+
+        area.addEventListener('input', update);
+        update();
+
+        document.getElementById('editor-download-btn').addEventListener('click', () => {
+          const blob = new Blob([area.value], { type: 'text/markdown' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'document.md';
+          a.click();
+        });
+      }
+    };
+
+    // --- ARCADE & LOGIC GAMES MODULE ---
+    const GamesModule = {
+      tttBoard: Array(9).fill(null),
+
+      init() {
+        this.setupTabs();
+        this.initTicTacToe();
+        this.initSnake();
+        this.initMath();
+      },
+
+      setupTabs() {
+        const tabs = document.querySelectorAll('.game-tab-btn');
+        const subviews = document.querySelectorAll('.game-subview');
+        
+        tabs.forEach(tab => {
+          tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('border-indigo-600', 'text-indigo-600', 'dark:text-indigo-400'));
+            tab.classList.add('border-indigo-600', 'text-indigo-600', 'dark:text-indigo-400');
+
+            const target = tab.getAttribute('data-game');
+            subviews.forEach(sv => sv.classList.add('hidden'));
+            document.getElementById(`game-view-${target}`).classList.remove('hidden');
+          });
+        });
+      },
+
+      // Tic Tac Toe AI Logic
+      initTicTacToe() {
+        const grid = document.getElementById('ttt-grid');
+        grid.innerHTML = '';
+        this.tttBoard = Array(9).fill(null);
+
+        for (let i = 0; i < 9; i++) {
+          const cell = document.createElement('button');
+          cell.className = 'w-full h-full glass-panel rounded-xl text-xl font-extrabold flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-800 transition';
+          cell.addEventListener('click', () => this.makeTTTMove(i));
+          grid.appendChild(cell);
+        }
+
+        document.getElementById('ttt-reset-btn').addEventListener('click', () => this.initTicTacToe());
+      },
+
+      makeTTTMove(index) {
+        if (this.tttBoard[index] || this.checkTTTWinner(this.tttBoard)) return;
+
+        this.tttBoard[index] = 'X';
+        this.renderTTT();
+
+        if (!this.checkTTTWinner(this.tttBoard) && this.tttBoard.includes(null)) {
+          setTimeout(() => {
+            const aiMove = this.getBestTTTMove();
+            this.tttBoard[aiMove] = 'O';
+            this.renderTTT();
+          }, 250);
+        }
+      },
+
+      getBestTTTMove() {
+        const emptyIndices = this.tttBoard.map((val, idx) => val === null ? idx : null).filter(val => val !== null);
+        return emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+      },
+
+      renderTTT() {
+        const grid = document.getElementById('ttt-grid');
+        Array.from(grid.children).forEach((cell, idx) => {
+          cell.textContent = this.tttBoard[idx] || '';
+        });
+
+        const winner = this.checkTTTWinner(this.tttBoard);
+        const status = document.getElementById('ttt-status');
+        if (winner) {
+          status.textContent = winner === 'Tie' ? 'Match Tied!' : `Winner: ${winner}`;
+        } else {
+          status.textContent = 'Your Turn (X)';
+        }
+      },
+
+      checkTTTWinner(b) {
+        const lines = [
+          [0,1,2], [3,4,5], [6,7,8],
+          [0,3,6], [1,4,7], [2,5,8],
+          [0,4,8], [2,4,6]
+        ];
+        for (let l of lines) {
+          if (b[l[0]] && b[l[0]] === b[l[1]] && b[l[0]] === b[l[2]]) return b[l[0]];
+        }
+        if (!b.includes(null)) return 'Tie';
+        return null;
+      },
+
+      // Snake Game with Mobile Touch D-Pad
+      initSnake() {
+        const canvas = document.getElementById('snake-canvas');
+        const ctx = canvas.getContext('2d');
+        document.getElementById('snake-highscore').textContent = AppState.snakeHighScore;
+
+        let snake = [{x: 7, y: 7}];
+        let food = {x: 3, y: 3};
+        let dx = 1, dy = 0;
+        let score = 0;
+        let gameInterval = null;
+
+        const draw = () => {
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(0, 0, 300, 300);
+
+          const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+          
+          if (head.x < 0 || head.x >= 15 || head.y < 0 || head.y >= 15 || snake.some(s => s.x === head.x && s.y === head.y)) {
+            clearInterval(gameInterval);
+            if (score > AppState.snakeHighScore) {
+              AppState.snakeHighScore = score;
+              localStorage.setItem('omni_snake_hs', score);
+              document.getElementById('snake-highscore').textContent = score;
+              document.getElementById('dash-stat-score').textContent = score;
+            }
+            return;
+          }
+
+          snake.unshift(head);
+
+          if (head.x === food.x && head.y === food.y) {
+            score += 10;
+            document.getElementById('snake-score').textContent = score;
+            food = {x: Math.floor(Math.random() * 15), y: Math.floor(Math.random() * 15)};
+          } else {
+            snake.pop();
+          }
+
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(food.x * 20, food.y * 20, 18, 18);
+
+          ctx.fillStyle = '#6366f1';
+          snake.forEach(s => ctx.fillRect(s.x * 20, s.y * 20, 18, 18));
+        };
+
+        const changeDir = (dir) => {
+          if (dir === 'up' && dy === 0) { dx = 0; dy = -1; }
+          if (dir === 'down' && dy === 0) { dx = 0; dy = 1; }
+          if (dir === 'left' && dx === 0) { dx = -1; dy = 0; }
+          if (dir === 'right' && dx === 0) { dx = 1; dy = 0; }
+        };
+
+        document.getElementById('snake-start-btn').addEventListener('click', () => {
+          clearInterval(gameInterval);
+          snake = [{x: 7, y: 7}];
+          dx = 1; dy = 0; score = 0;
+          document.getElementById('snake-score').textContent = '0';
+          gameInterval = setInterval(draw, 140);
+        });
+
+        // Mobile D-Pad listeners
+        document.getElementById('s-up').addEventListener('click', () => changeDir('up'));
+        document.getElementById('s-down').addEventListener('click', () => changeDir('down'));
+        document.getElementById('s-left').addEventListener('click', () => changeDir('left'));
+        document.getElementById('s-right').addEventListener('click', () => changeDir('right'));
+
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowUp') changeDir('up');
+          if (e.key === 'ArrowDown') changeDir('down');
+          if (e.key === 'ArrowLeft') changeDir('left');
+          if (e.key === 'ArrowRight') changeDir('right');
+        });
+      },
+
+      // Speed Math Game
+      initMath() {
+        let currentAns = 0;
+        let score = 0;
+        let time = 60;
+        let timer = null;
+
+        const nextProb = () => {
+          const a = Math.floor(Math.random() * 20) + 1;
+          const b = Math.floor(Math.random() * 20) + 1;
+          currentAns = a + b;
+          document.getElementById('math-problem').textContent = `${a} + ${b} = ?`;
+        };
+
+        const input = document.getElementById('math-answer-input');
+        input.addEventListener('input', () => {
+          if (parseInt(input.value) === currentAns) {
+            score += 10;
+            document.getElementById('math-score').textContent = score;
+            input.value = '';
+            nextProb();
+          }
+        });
+
+        document.getElementById('math-start-btn').addEventListener('click', () => {
+          score = 0; time = 60;
+          document.getElementById('math-score').textContent = '0';
+          document.getElementById('math-time').textContent = '60';
+          input.disabled = false;
+          input.focus();
+          nextProb();
+
+          clearInterval(timer);
+          timer = setInterval(() => {
+            time--;
+            document.getElementById('math-time').textContent = time;
+            if (time <= 0) {
+              clearInterval(timer);
+              input.disabled = true;
+              document.getElementById('math-problem').textContent = 'Time Up!';
+            }
+          }, 1000);
+        });
+      }
+    };
+
+    // --- UTILITY SUITE MODULE ---
+    const UtilityModule = {
+      init() {
+        this.setupPasswordGen();
+        this.setupPaletteGen();
+        this.setupTimer();
+      },
+
+      setupPasswordGen() {
+        const gen = () => {
+          const len = parseInt(document.getElementById('pass-length').value);
+          const incSym = document.getElementById('pass-inc-sym').checked;
+          const incNum = document.getElementById('pass-inc-num').checked;
+          
+          let chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+          if (incNum) chars += '0123456789';
+          if (incSym) chars += '!@#$%^&*()_+-=[]{}';
+
+          let res = '';
+          for (let i = 0; i < len; i++) {
+            res += chars.charAt(Math.floor(Math.random() * chars.length));
+          }
+          document.getElementById('pass-output').value = res;
+        };
+
+        document.getElementById('pass-length').addEventListener('input', (e) => {
+          document.getElementById('pass-len-val').textContent = e.target.value;
+        });
+        document.getElementById('pass-generate-btn').addEventListener('click', gen);
+        document.getElementById('pass-copy-btn').addEventListener('click', () => {
+          const val = document.getElementById('pass-output').value;
+          navigator.clipboard.writeText(val);
+        });
+        gen();
+      },
+
+      setupPaletteGen() {
+        const gen = () => {
+          const display = document.getElementById('palette-display');
+          display.innerHTML = '';
+          for (let i = 0; i < 5; i++) {
+            const color = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+            const swatch = document.createElement('div');
+            swatch.className = 'h-full flex items-end justify-center pb-2 text-[9px] font-mono font-extrabold text-white shadow-inner cursor-pointer';
+            swatch.style.backgroundColor = color;
+            swatch.textContent = color;
+            swatch.addEventListener('click', () => navigator.clipboard.writeText(color));
+            display.appendChild(swatch);
+          }
+        };
+
+        document.getElementById('palette-generate-btn').addEventListener('click', gen);
+        gen();
+      },
+
+      setupTimer() {
+        let elapsed = 0;
+        let timer = null;
+
+        const updateDisplay = () => {
+          const mins = Math.floor(elapsed / 6000).toString().padStart(2, '0');
+          const secs = Math.floor((elapsed % 6000) / 100).toString().padStart(2, '0');
+          const ms = (elapsed % 100).toString().padStart(2, '0');
+          document.getElementById('timer-display').textContent = `${mins}:${secs}.${ms}`;
+        };
+
+        document.getElementById('timer-start-btn').addEventListener('click', () => {
+          if (timer) return;
+          timer = setInterval(() => { elapsed++; updateDisplay(); }, 10);
+        });
+        document.getElementById('timer-pause-btn').addEventListener('click', () => {
+          clearInterval(timer); timer = null;
+        });
+        document.getElementById('timer-reset-btn').addEventListener('click', () => {
+          clearInterval(timer); timer = null; elapsed = 0; updateDisplay();
+        });
+      }
+    };
+
+    // --- APPLICATION ENTRY POINT ---
+    window.addEventListener('DOMContentLoaded', () => {
+      UI.init();
+      TaskModule.init();
+      CanvasModule.init();
+      AnalyticsModule.init();
+      EditorModule.init();
+      GamesModule.init();
+      UtilityModule.init();
+    });
+  </script>
+</body>
+</html>
